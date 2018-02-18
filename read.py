@@ -1,6 +1,7 @@
 # Reads data from Arduino and saves to file
 import serial
 import pyrebase
+import math
 
 config = {
   "apiKey": "AIzaSyDrr76124iABn9Ukw0NgmXFfdnnW_92thg",
@@ -30,22 +31,22 @@ data = data[:-1]
 print("Finished")
 ser.close()
 
-r;
+r = 10
 
-coordinates = [];
+coordinates = []
 
 for i in range (0,len(data)):
     distance = int(data[i][0])
     baseAngle = int(data[i][1])
     sideAngle = int(data[i][2])
 
-    point = [];
+    point = []
     #X
-    point.append((r-distance)*math.cos(sideAngle)*math.cos(270-baseAngle))
+    point.append(int((r-distance)*math.cos(sideAngle)*math.cos(270-baseAngle)*1000))
     #Y
-    point.append((r-distance)*math.sin(sideAngle))
+    point.append(int((r-distance)*math.sin(sideAngle)*1000))
     #Z
-    point.append((r-distance)*math.sin(270-baseAngle))
+    point.append(int((r-distance)*math.sin(270-baseAngle)*1000))
 
     coordinates.append(point)
 
