@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>3D Object Scanner Display</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            color: #cccccc;
+            font-family:Monospace;
+            font-size:13px;
+            text-align:center;
+            background-color: #050505;
+            margin: 0px;
+            overflow: hidden;
+        }
+        #info {
+            position: absolute;
+            top: 0px; width: 100%;
+            padding: 5px;
+        }
+        a {
+            color: #0080ff;
+        }
+    </style>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/90/three.js"></script>
+
+<script src="js/Detector.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
+<script src="js/vendor/jquery-3.2.1.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">3D Scanner</a>
+        </div>
+    </div>
+</nav>
+<div class="alert alert-success" id="success-alert">
+    <strong>New object scanned!</strong>
+</div>
+<div id="container"></div>
+
+
+
+<script>
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyDrr76124iABn9Ukw0NgmXFfdnnW_92thg",
+        authDomain: "threedscanner.firebaseapp.com",
+        databaseURL: "https://threedscanner.firebaseio.com",
+        projectId: "threedscanner",
+        storageBucket: "threedscanner.appspot.com",
+        messagingSenderId: "1065749619153"
+    };
+    firebase.initializeApp(config);
+    var reset = 0;
+    if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+    var container, stats;
+    var camera, scene, renderer;
+    var points;
+    var starCountRef = firebase.database().ref('objects');
+    starCountRef.on('value', function(snapshot) {
+        //console.log(snapshot.val());
+        reset++;
+        if(reset === 2)
+            location.reload();
+        init(snapshot.val());
+        animate();
+        $("#success-alert").fadeTo(2000, 500).slideUp(500, function(){
+            $("#success-alert").slideUp(500);
+        });
+        //render();
+    });
+    //init();
+    //animate();
+
+    function init(arrayXYZ) {
+        /*
+        for (var i = 0; i < arrayXYZ.length; i++) {
+            for(var z = 0; z < arrayXYZ[i].length; z++)
+                console.log(arrayXYZ[i][z])
+        }
+        */
+        container = document.getElementById( 'container' );
+        //
+        camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 3500 );
+        camera.position.z = 1;
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0x050505 );
+        scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+        //
+        var particles = 5000;
+        var geometry = new THREE.BufferGeometry();
+        var positions = [];
+        var colors = [];
+        var color = new THREE.Color();
+        var n = 1000, n2 = n / 2; // particles spread in the cube
+        for ( var i = 0; i < arrayXYZ.length; i ++ ) {
+            // positions
+            /*
+            var x = Math.random() * n - n2;
+            var y = Math.random() * n - n2;
+            var z = Math.random() * n - n2;
+            */
+            var x = arrayXYZ[i][0];
+            var y = arrayXYZ[i][1];
+            var z = arrayXYZ[i][2];
+            positions.push( x, y, z );
+            // colors
+            color.setRGB( 1.0, 1.0, 1.0 );
+            colors.push( color.r, color.g, color.b );
+        }
+        geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+        geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+        geometry.computeBoundingSphere();
+        //
+        var material = new THREE.PointsMaterial( { size: 50, vertexColors: THREE.VertexColors } );
+        points = new THREE.Points( geometry, material );
+        scene.add( points );
+        //
+        renderer = new THREE.WebGLRenderer( { antialias: false } );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        container.appendChild( renderer.domElement );
+        //
+        stats = new Stats();
+        //container.appendChild( stats.dom );
+        //
+        window.addEventListener( 'resize', onWindowResize, false );
+
+    }
+
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+    }
+    //
+    function animate() {
+        requestAnimationFrame( animate );
+        render();
+        stats.update();
+    }
+    function render() {
+        var time = Date.now() * 0.001;
+        //points.rotation.x = time * 0.25;
+        points.rotation.y = time * 0.5;
+        renderer.render( scene, camera );
+    }
+</script>
+
+</body>
+</html>
