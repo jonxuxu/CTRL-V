@@ -40,7 +40,7 @@ for i in range (0,len(data)):
     baseAngle = int(data[i][1])
     sideAngle = int(data[i][2])
 
-    if (r-distance >0):
+    if (r-distance > 0 and distance < r):
         point = []
        #X
        point.append(int((r-distance)*math.cos(sideAngle)*math.cos(270-baseAngle)*1000))
