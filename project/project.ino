@@ -33,7 +33,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  for (int i = 90; i >= 0; i -= 5){
+  for (int i = 90; i >= 15; i -= 5){
 
     servo3.write(180-i);
     servo4.write(i);
@@ -47,7 +47,7 @@ void loop() {
         Serial.print(',');
         Serial.print(2*x); // Base position in degrees
         Serial.print(',');
-        Serial.println(i-10); // Side agle position in degrees
+        Serial.println(i); // Side agle position in degrees
         servo1.write(x);
         servo2.write(x);
         delay(150);
@@ -65,7 +65,9 @@ void loop() {
         servo2.write(x);
         delay(150);
       }
-    }   
+    }
+
+   turn++;
   }
   
 
