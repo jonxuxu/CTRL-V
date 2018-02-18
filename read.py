@@ -50,4 +50,4 @@ for i in range (0,len(data)):
     coordinates.append(point)
 
 
-db.child('users').push(coordinates)
+db.child('objects').set(coordinates)
