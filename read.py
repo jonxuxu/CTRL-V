@@ -30,5 +30,5 @@ data = data[:-1]
 print("Finished")
 ser.close()
 
-db.child('users').push(data)
+db.child('objects').set(data)
 
