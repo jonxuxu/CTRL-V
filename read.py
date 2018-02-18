@@ -31,7 +31,7 @@ data = data[:-1]
 print("Finished")
 ser.close()
 
-r = 10
+r = 13
 
 coordinates = []
 
