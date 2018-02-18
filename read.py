@@ -30,5 +30,24 @@ data = data[:-1]
 print("Finished")
 ser.close()
 
-db.child('users').push(data)
+r;
 
+coordinates = [];
+
+for i in range (0,len(data)):
+    distance = int(data[i][0])
+    baseAngle = int(data[i][1])
+    sideAngle = int(data[i][2])
+
+    point = [];
+    #X
+    point.append((r-distance)*math.cos(sideAngle)*math.cos(270-baseAngle))
+    #Y
+    point.append((r-distance)*math.sin(sideAngle))
+    #Z
+    point.append((r-distance)*math.sin(270-baseAngle))
+
+    coordinates.append(point)
+
+
+#db.child('users').push(coordinates)
