@@ -1,4 +1,4 @@
-# UOttaHack
+# Ctrl-V @ UOttaHack
 
 This repository is the code behind our hack submission for UOttaHack 2018. Feel free to use this for educational or non-commercial purposes.
 
